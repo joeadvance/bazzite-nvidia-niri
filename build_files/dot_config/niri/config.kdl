@@ -602,6 +602,8 @@ binds {
 }
 
 spawn-at-startup "dms run"
+spawn-sh-at-startup "lxpolkit"
+spawn-sh-at-startup "SSH_ASKPASS=/usr/libexec/openssh/ssh-askpass SSH_ASKPASS_REQUIRE=force ssh-add /home/morro/.ssh/id_rsa < /dev/null"
 
 window-rule {
   // Rounded corners for a modern look.
@@ -613,16 +615,16 @@ window-rule {
 
 debug {
   // Allows notification actions and window activation from Noctalia.
-  honor-xdg-activation-with-invalid-serial
-  render-drm-device "/dev/dri/renderD129"
-  wait-for-frame-completion-before-queueing
+  /-honor-xdg-activation-with-invalid-serial
+  /-render-drm-device "/dev/dri/renderD129"
+  /-wait-for-frame-completion-before-queueing
 }
 
 // Monique monitor configuration
 include "monitors.kdl"
 
 // Sincronizzazione colori con Noctalia
-include "noctalia.kdl"
+/-include "noctalia.kdl"
 
 // Set the overview wallpaper on the backdrop.
 	layer-rule {
@@ -635,3 +637,10 @@ gestures {
         off
     }
 }
+include "dms/binds.kdl"
+
+include "dms/outputs.kdl"
+
+include "dms/windowrules.kdl"
+
+include "dms/cursor.kdl"
