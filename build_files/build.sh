@@ -2,19 +2,38 @@
 
 set -ouex pipefail
 
-### Install packages
+## DNF5 Speedup
+sed -i '/^\[main\]/a max_parallel_downloads=10' /etc/dnf/dnf.conf
 
-# Packages can be installed from any enabled yum repo on the image.
-# RPMfusion repos are available by default in ublue main images
-# List of rpmfusion packages can be found here:
-# https://mirrors.rpmfusion.org/mirrorlist?path=free/fedora/updates/43/x86_64/repoview/index.html&protocol=https&redirect=1
+## System apps
+dnf -y install flatpak-builder wlr-randr iotop sysstat lxqt-openssh-askpass lxpolkit parallel wl-mirror kanshi
 
-# this installs a package from fedora repos
-dnf5 install -y tmux
-dnf5 install -y niri wl-mirror kitty kanshi 
+# User apps
+dnf -y install nautilus kitty mpv gnome-terminal gnome-system-monitor
 
-# Install Dank Material Shell
-curl --output-dir "/etc/yum.repos.d/" \
+# OBS and fully-featured ffmpeg with nonfree components from rpm fusion
+dnf -y install https://mirrors.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm https://mirrors.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm
+# dnf -y install ffmpeg x264-libs obs-studio obs-studio-plugin-x264 --allowerasing
+
+# Nautilus open any terminal extension
+curl -Lo /etc/yum.repos.d/nautilus-open-any-terminal.repo \
+  https://copr.fedorainfracloud.org/coprs/monkeygold/nautilus-open-any-terminal/repo/fedora-$(rpm -E %fedora)/monkeygold-nautilus-open-any-terminal-fedora-$(rpm -E %fedora).repo
+dnf install -y nautilus-open-any-terminal
+glib-compile-schemas /usr/share/glib-2.0/schemas
+gsettings set com.github.stunkymonkey.nautilus-open-any-terminal terminal kitty
+
+
+# Install Niri 
+dnf -y install niri 
+
+# # Install Noctalia shell
+# curl -fsSL https://github.com/terrapkg/subatomic-repos/raw/main/terra.repo -o /etc/yum.repos.d/terra.repo
+# dnf -y install terra-release
+# dnf -y install noctalia-shell 
+# # ABILITARE LE NOTIFICHE: systemctl --user enable --now swaync.service
+
+# Install Dank Linux shell
+sudo curl --output-dir "/etc/yum.repos.d/" \
   --remote-name "https://copr.fedorainfracloud.org/coprs/avengemedia/dms/repo/fedora-$(rpm -E %fedora)/avengemedia-dms-fedora-$(rpm -E %fedora).repo"
 dnf -y install quickshell dms greetd dms-greeter --allowerasing 
 #
@@ -36,17 +55,21 @@ ln -s /usr/lib/systemd/user/dms.service /etc/skel/.config/systemd/user/graphical
 mkdir -p /etc/skel/.config/niri/
 cp -rf /ctx/dot_config/niri/config.kdl /etc/skel/.config/niri/
 
+# DEV packages
+# cargo evtest git input-remapper libevdev-devel libinput-utils python3-devel
 
-# Use a COPR Example:
-#
-# dnf5 -y copr enable ublue-os/staging
-# dnf5 -y install package
-# Disable COPRs so they don't end up enabled on the final image:
-# dnf5 -y copr disable ublue-os/staging
+# dnf -y install bitwarden-cli 
 
-#### Example for enabling a System Unit File
+#### Enable podman
 
 systemctl enable podman.socket
+
+# Disable Origami tips
+
+sudo mv /etc/profile.d/origami-aliases.sh /etc/profile.d/origami-aliases.sh.bak
+
+# Remove COSMIC shell and waybar
+dnf -y remove cosmic-comp cosmic-initial-setup cosmic-settings cosmic-settings-daemon cosmic-store  waybar
 
 ## CLEAN UP
 # Clean up dnf cache to reduce image size
