@@ -14,7 +14,7 @@ dnf5 install -y tmux
 dnf5 install -y niri wl-mirror kitty kanshi 
 
 # Install Dank Material Shell
-sudo curl --output-dir "/etc/yum.repos.d/" \
+curl --output-dir "/etc/yum.repos.d/" \
   --remote-name "https://copr.fedorainfracloud.org/coprs/avengemedia/dms/repo/fedora-$(rpm -E %fedora)/avengemedia-dms-fedora-$(rpm -E %fedora).repo"
 dnf -y install quickshell dms greetd dms-greeter --allowerasing 
 #
